@@ -22,9 +22,17 @@
 
 #define UASSERT(cond) UTest::Assert(STRIFY(cond), PRETTY_FUNCTION, __LINE__, cond)
 
-template<typename T>
+//holds a result information
+struct ResultPair
+{
+	const char* name;
+	const char* funcName;
+	int line;
+};
+
 struct Results
 {
+	using T = ResultPair;
     Results() : results_{nullptr}, capacity_{1}, size_{0} {}
 
     T* begin() { return &results_[0]; }
@@ -59,16 +67,50 @@ private:
     size_t size_;
 };
 
-class UTest
+
+//We have to do this to be able to make it work with C++ 14 and below
+template<typename T = void>
+struct Count
+{
+	static int count_;
+};
+template<typename T>
+int Count<T>::count_{};
+
+template<typename T = void>
+struct StoponFail
+{
+	static bool stopOnFail_;
+};
+template<typename T>
+bool StoponFail<T>::stopOnFail_ = false;
+
+template<typename T>
+struct TestResults
+{
+	static Results failedResults_;
+};
+template<typename T>
+Results TestResults<T>::failedResults_;
+
+//The main test class
+class UTest : private Count<void>, private StoponFail<void>, private TestResults<ResultPair>
 {
 public:
     UTest() = default;
 
+	/**
+	 * @brief stop as soon as a test fails, rest of the tests are ignored
+	 */
 	static void stopOnFirstFailure(bool value = true)
 	{
 		stopOnFail_ = value;
 	}
 
+	/**
+	 * @brief This doesn't assert anything technically. It just adds the result to a list.
+	 * 	Don't use this function directly! Use the macro UASSERT instead
+	 */
     static void Assert(const char* name, const char* func, int line, bool check)
     {
         ++count_;
@@ -87,19 +129,13 @@ public:
 	}
 
 private:
-	struct ResultPair
-	{
-		const char* name;
-        const char* funcName;
-        int line;
-	};
 
     static void report()
     {
         fprintf(stderr, "%d Tests run.\n", count_);
         bool allPassed = failedResults_.size() == 0;
         for (const auto& rp : failedResults_) {
-            PRINT_RED("[FAIL]");
+            PRINT_RED("\n[FAIL]");
             fprintf(stderr, ": %s\n", rp.name);
             const char* funcName = rp.funcName;
             const int line = rp.line;
@@ -115,10 +151,6 @@ private:
             fprintf(stderr, "------------------------------\n");
         }
     }
-
-    inline static Results<ResultPair> failedResults_{};
-    inline static int count_ = 0;
-	inline static bool stopOnFail_ = false;
 };
 
 #endif
