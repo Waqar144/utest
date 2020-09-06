@@ -32,5 +32,5 @@ int main()
 	test_vector();
 	test_failure();
 
-	return 0;
+	return UTest::ReturnValue;
 }

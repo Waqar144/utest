@@ -94,8 +94,13 @@ struct TestResults
 template<typename T>
 Results TestResults<T>::failedResults_;
 
+template<typename T = void>
+struct ReturnVal { static int ReturnValue; };
+template<typename T>
+int ReturnVal<T>::ReturnValue = 0;
+
 //The main test class
-class UTest : private Count<void>, private StoponFail<void>, private TestResults<ResultPair>
+class UTest : private Count<void>, private StoponFail<void>, private TestResults<ResultPair>, public ReturnVal<void>
 {
 public:
     UTest() = default;
@@ -116,6 +121,7 @@ public:
     {
         ++count_;
         if (!check) {
+			ReturnValue = 1;
             failedResults_.add(ResultPair{name, func, file, line});
 			if (stopOnFail_) {
 				report();
