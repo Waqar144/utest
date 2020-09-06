@@ -18,7 +18,7 @@ void test_vector()
 void test_failure()
 {
 	int x = 10;
-	UASSERT(x == 9);
+	UASSERT(x == 10);
 }
 
 int main()
@@ -26,7 +26,6 @@ int main()
 	UTest t;
 
 	UASSERT(1 == 1);
-	UASSERT(2 == 1);
 
 	test_stringEquality();
 	test_vector();
