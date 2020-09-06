@@ -1,7 +1,7 @@
 UTest
 ====
 
-Simple, small, header-only testing library. I wrote this to test simple stuff I write (for which I don't need many thousands of lines worth of unit testing libraries).
+Simple, small, header-only testing library. I wrote this to test simple stuff I write (for which I don't need many thousands of lines worth of unit testing libraries). It can also be used directly inside your code and is useful with projects like Qt where testing GUI code is very difficult.
 
 ## Usage
 
@@ -12,7 +12,7 @@ Some things I should mention:
 
 Example:
 
-```
+```cpp
 #include "utest.h"
 
 void test_someFuncName() { UASSERT(1 == 1); }
@@ -20,6 +20,9 @@ void test_someFuncName() { UASSERT(1 == 1); }
 int main()
 {
 	UTest t; //this is necessary
+
+	//If you want to stop on first failure
+	t.stopOnFirstFailure();
 
 	//call your test functions here
 	test_someFuncName();
