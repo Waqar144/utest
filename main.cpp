@@ -1,5 +1,4 @@
 #include "utest.h"
-#include "class.h"
 
 #include <string>
 #include <vector>
@@ -29,9 +28,6 @@ int main()
 	test_stringEquality();
 	test_vector();
 	test_failure();
-
-	TestClass c;
-	c.runTests();
 
 	return 0;
 }
