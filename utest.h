@@ -20,13 +20,14 @@
 	#define PRETTY_FUNCTION __FUNCSIG__
 #endif
 
-#define UASSERT(cond) UTest::Assert(STRIFY(cond), PRETTY_FUNCTION, __LINE__, cond)
+#define UASSERT(cond) UTest::Assert(STRIFY(cond), PRETTY_FUNCTION, __FILE__, __LINE__, cond)
 
 //holds a result information
 struct ResultPair
 {
 	const char* name;
 	const char* funcName;
+	const char* file;
 	int line;
 };
 
@@ -111,11 +112,11 @@ public:
 	 * @brief This doesn't assert anything technically. It just adds the result to a list.
 	 * 	Don't use this function directly! Use the macro UASSERT instead
 	 */
-    static void Assert(const char* name, const char* func, int line, bool check)
+    static void Assert(const char* name, const char* func, const char* file, int line, bool check)
     {
         ++count_;
         if (!check) {
-            failedResults_.add(ResultPair{name, func, line});
+            failedResults_.add(ResultPair{name, func, file, line});
 			if (stopOnFail_) {
 				report();
 				exit(EXIT_FAILURE);
@@ -139,7 +140,8 @@ private:
             fprintf(stderr, ": %s\n", rp.name);
             const char* funcName = rp.funcName;
             const int line = rp.line;
-            fprintf(stderr, "\tat Line '%d' in \"%s\"", line, funcName);
+			fprintf(stderr, "\tIn file \"%s\" ", rp.file);
+            fprintf(stderr, "at line '%d' in \"%s\"", line, funcName);
         }
         if (!allPassed) {
             fprintf(stderr, "\n------------------------------\n");
