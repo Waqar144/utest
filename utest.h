@@ -20,7 +20,7 @@
 	#define PRETTY_FUNCTION __FUNCSIG__
 #endif
 
-#define UASSERT(cond) UTest::Assert(STRIFY(cond), PRETTY_FUNCTION, __FILE__, __LINE__, cond)
+#define UASSERT(condition) UTest::Assert(STRIFY(condition), PRETTY_FUNCTION, __FILE__, __LINE__, cond)
 
 //holds a result information
 struct ResultPair
@@ -33,7 +33,7 @@ struct ResultPair
 
 struct Results
 {
-	using T = ResultPair;
+    using T = ResultPair;
     Results() : results_{nullptr}, capacity_{1}, size_{0} {}
 
     T* begin() { return &results_[0]; }
