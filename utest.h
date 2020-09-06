@@ -20,7 +20,7 @@
 	#define PRETTY_FUNCTION __FUNCSIG__
 #endif
 
-#define UASSERT(condition) UTest::Assert(STRIFY(condition), PRETTY_FUNCTION, __FILE__, __LINE__, cond)
+#define UASSERT(condition) UTest::Assert(STRIFY(condition), PRETTY_FUNCTION, __FILE__, __LINE__, condition)
 
 //holds a result information
 struct ResultPair

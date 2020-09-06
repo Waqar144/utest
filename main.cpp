@@ -25,6 +25,9 @@ int main()
 {
 	UTest t;
 
+	UASSERT(1 == 1);
+	UASSERT(2 == 1);
+
 	test_stringEquality();
 	test_vector();
 	test_failure();
