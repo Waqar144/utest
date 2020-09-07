@@ -20,15 +20,15 @@ void test_someFuncName() { UASSERT(1 == 1); }
 
 int main()
 {
-	UTest t; //this is necessary
+    UTest t; //this is necessary
 
-	//If you want to stop on first failure
-	t.stopOnFirstFailure();
+    //If you want to stop on first failure
+    t.stopOnFirstFailure();
 
-	//call your test functions here
-	test_someFuncName();
+    //call your test functions here
+    test_someFuncName();
 
-	return UTest::ReturnValue;
+    return UTest::ReturnValue;
 }
 ```
 

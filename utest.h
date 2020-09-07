@@ -15,20 +15,20 @@
 #define STRIFY(S) STRIFY_IMPL(S)
 
 #if defined(__GNUC__) || defined(__clang__)
-	#define PRETTY_FUNCTION __PRETTY_FUNCTION__
+    #define PRETTY_FUNCTION __PRETTY_FUNCTION__
 #elif defined(_MSC_VER)
-	#define PRETTY_FUNCTION __FUNCSIG__
+    #define PRETTY_FUNCTION __FUNCSIG__
 #endif
 
 #define UASSERT(condition) UTest::Assert(STRIFY(condition), PRETTY_FUNCTION, __FILE__, __LINE__, condition)
 
-//holds a result information
+//holds a single result information
 struct ResultPair
 {
-	const char* name;
-	const char* funcName;
-	const char* file;
-	int line;
+    const char* name;
+    const char* funcName;
+    const char* file;
+    int line;
 };
 
 struct Results
@@ -49,18 +49,19 @@ struct Results
     }
 
     ~Results() { free(results_); }
+
 private:
     void grow()
     {
-		results_ = static_cast<T*>(
-				std::realloc(static_cast<void*>(results_),
-							sizeof(T) * capacity_ * 2)
-				);
-		if (!results_) {
-			fprintf(stderr, RED "Allocation failed! Exiting...\n");
-			exit(EXIT_FAILURE);
-		}
-		capacity_ *= 2;
+        results_ = static_cast<T*>(
+                std::realloc(static_cast<void*>(results_),
+                    sizeof(T) * capacity_ * 2)
+                );
+        if (!results_) {
+            fprintf(stderr, RED "Allocation failed! Exiting...\n");
+            exit(EXIT_FAILURE);
+        }
+        capacity_ *= 2;
     }
 
     T* results_;
@@ -73,7 +74,7 @@ private:
 template<typename T = void>
 struct Count
 {
-	static int count_;
+    static int count_;
 };
 template<typename T>
 int Count<T>::count_{};
@@ -81,15 +82,15 @@ int Count<T>::count_{};
 template<typename T = void>
 struct StoponFail
 {
-	static bool stopOnFail_;
+    static bool stopOnFail_;
 };
 template<typename T>
 bool StoponFail<T>::stopOnFail_ = false;
 
-template<typename T>
+template<typename T = void>
 struct TestResults
 {
-	static Results failedResults_;
+    static Results failedResults_;
 };
 template<typename T>
 Results TestResults<T>::failedResults_;
@@ -100,65 +101,62 @@ template<typename T>
 int ReturnVal<T>::ReturnValue = 0;
 
 //The main test class
-class UTest : private Count<void>, private StoponFail<void>, private TestResults<ResultPair>, public ReturnVal<void>
+class UTest : private Count<void>, private StoponFail<void>, private TestResults<void>, public ReturnVal<void>
 {
-public:
-    UTest() = default;
+    public:
+        UTest() = default;
 
-	/**
-	 * @brief stop as soon as a test fails, rest of the tests are ignored
-	 */
-	static void stopOnFirstFailure(bool value = true)
-	{
-		stopOnFail_ = value;
-	}
-
-	/**
-	 * @brief This doesn't assert anything technically. It just adds the result to a list.
-	 * 	Don't use this function directly! Use the macro UASSERT instead
-	 */
-    static void Assert(const char* name, const char* func, const char* file, int line, bool check)
-    {
-        ++count_;
-        if (!check) {
-			ReturnValue = 1;
-            failedResults_.add(ResultPair{name, func, file, line});
-			if (stopOnFail_) {
-				report();
-				exit(EXIT_FAILURE);
-			}
-		}
-    }
-
-	~UTest()
-	{
-		report();
-	}
-
-private:
-
-    static void report()
-    {
-        fprintf(stderr, "%d Tests run.\n", count_);
-        bool allPassed = failedResults_.size() == 0;
-        for (const auto& rp : failedResults_) {
-            PRINT_RED("\n[FAIL]");
-            fprintf(stderr, ": %s\n", rp.name);
-            const char* funcName = rp.funcName;
-            const int line = rp.line;
-			fprintf(stderr, "\tIn file \"%s\" ", rp.file);
-            fprintf(stderr, "at line '%d' in \"%s\"", line, funcName);
+        /**
+         * @brief stop as soon as a test fails, rest of the tests are ignored
+         */
+        static void stopOnFirstFailure(bool value = true)
+        {
+            stopOnFail_ = value;
         }
-        if (!allPassed) {
-            fprintf(stderr, "\n------------------------------\n");
-            PRINT_RED("Some tests failed!\n");
-            fprintf(stderr, "------------------------------\n");
-        } else {
-            fprintf(stderr, "\n------------------------------\n");
-            PRINT_GREEN("All tests passed\n");
-            fprintf(stderr, "------------------------------\n");
+
+        /**
+         * @brief This doesn't assert anything technically. It just adds the result to a list.
+         * 	Don't use this function directly! Use the macro UASSERT instead
+         */
+        static void Assert(const char* name, const char* func, const char* file, int line, bool check)
+        {
+            ++count_;
+            if (!check) {
+                ReturnValue = 1;
+                failedResults_.add(ResultPair{name, func, file, line});
+                if (stopOnFail_) {
+                    report();
+                    exit(EXIT_FAILURE);
+                }
+            }
         }
-    }
+
+        ~UTest() { report(); }
+
+    private:
+
+        static void report()
+        {
+            fprintf(stderr, "%d Tests run.\n", count_);
+            bool allPassed = failedResults_.size() == 0;
+            for (const auto& rp : failedResults_) {
+                PRINT_RED("\n[FAIL]");
+                fprintf(stderr, ": %s\n", rp.name);
+                const char* funcName = rp.funcName;
+                const int line = rp.line;
+                fprintf(stderr, "\tIn file \"%s\" ", rp.file);
+                fprintf(stderr, "at line '%d' in \"%s\"", line, funcName);
+            }
+            if (!allPassed) {
+                fprintf(stderr, "\n------------------------------\n");
+                PRINT_RED("Some tests failed!\n");
+                fprintf(stderr, "------------------------------\n");
+            } else {
+                fprintf(stderr, "\n------------------------------\n");
+                PRINT_GREEN("All tests passed\n");
+                fprintf(stderr, "------------------------------\n");
+            }
+        }
 };
 
 #endif
